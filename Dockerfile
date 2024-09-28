@@ -1,29 +1,33 @@
 # Etapa de construcción
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /source
 
-# Copiar la solución y los archivos del proyecto
-COPY backend-pub-sub.sln .
+# Copiar los archivos .csproj y restaurar las dependencias
+COPY *.sln . 
 COPY CommunWork/CommunWork.csproj CommunWork/
 COPY PublicadorAplication/PublicadorAplication.csproj PublicadorAplication/
 
-# Restaurar dependencias
 RUN dotnet restore
 
-# Copiar todo el código fuente
+# Copiar todo el código fuente y construir el proyecto
 COPY . .
-
 WORKDIR /source/PublicadorAplication
-
-# Publicar la aplicación
 RUN dotnet publish -c Release -o /app
 
-# Etapa de ejecución
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Etapa de producción
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
-
-# Copiar los archivos publicados de la etapa de construcción
 COPY --from=build /app .
 
-# Establecer el ENTRYPOINT para ejecutar la aplicación
+# Exponer los puertos HTTP (5148) y HTTPS (7108)
+EXPOSE 5148
+EXPOSE 7108
+
+# Configurar la aplicación para que escuche en los puertos correctos
+ENV ASPNETCORE_URLS="http://+:5148;https://+:7108"
+
+# Configurar la variable de entorno para el entorno de desarrollo
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Comando de inicio
 ENTRYPOINT ["dotnet", "PublicadorAplication.dll"]
