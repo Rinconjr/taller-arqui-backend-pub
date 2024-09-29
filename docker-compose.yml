@@ -14,6 +14,17 @@ services:
     networks:
       - my_network # Red para comunicación con otros contenedores
 
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672" # Puerto para RabbitMQ
+      - "15672:15672" # Puerto para RabbitMQ Management
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - my_network
+
 networks:
   my_network:
     driver: bridge
