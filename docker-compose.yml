@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  backend-pub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5148:5148" # Mapea el puerto HTTP
+      - "7108:7108" # Mapea el puerto HTTPS (si es necesario)
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5148
+    networks:
+      - my_network # Red para comunicación con otros contenedores
+
+networks:
+  my_network:
+    driver: bridge
